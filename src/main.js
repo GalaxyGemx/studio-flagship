@@ -1,68 +1,68 @@
 import './styles/main.css';
-import { StudioEngine } from './three/StudioEngine.js';
-import { initScrollChoreography } from './ui/scrollChoreography.js';
-import { initZone1Controls } from './ui/zone1Controls.js';
-import { initZone2HotspotsAndCallouts } from './ui/zone2Hotspots.js';
-import { initZone3Portal } from './ui/zone3Portal.js';
+import { initZone1Hero } from './ui/zone1Hero.js';
+import { initZone2LayerStack } from './ui/zone2LayerStack.js';
+import { initZone3Workflows } from './ui/zone3Workflows.js';
 import { initZone4Estimator } from './ui/zone4Estimator.js';
 import { initZone5Configurator } from './ui/zone5Configurator.js';
+import { initScrollChoreography } from './ui/scrollChoreography.js';
 import { initNavigation, showToast } from './ui/navigation.js';
 
-function bootstrapStudioFlagship() {
-  const canvas = document.getElementById('studio-canvas');
-  if (!canvas) {
-    throw new Error('Studio WebGL canvas element (#studio-canvas) not found.');
-  }
-
-  // 1. Initialize unified 60 FPS PBR 3D WebGL Engine
-  const engine = new StudioEngine(canvas);
-
-  // 2. Initialize Zone 5 Configurator & 1-Click Booking Modal first so other zones can trigger it
+function bootstrapCorporateShowcase() {
+  // 1. Initialize Zone 5 Magnetic Assembly & Consultation Modal first so any CTA can open it
   const zone5 = initZone5Configurator({
     onShowToast: showToast,
   });
 
-  // 3. Initialize Lenis + GSAP ScrollTrigger (scrub: 1.2) Choreography
-  let navApi = null;
-  const scrollController = initScrollChoreography(engine, {
-    onZoneChange: (zoneId) => navApi?.setActiveZone(zoneId),
-    onScrollPercent: (pct) => navApi?.setScrollPercent(pct),
+  // 2. Initialize Zone 1 Executive Hero & Live Client/Operations Switcher
+  initZone1Hero({
+    onOpenConsultation: (opts) => zone5.openConsultationModal(opts),
   });
 
-  // 4. Initialize Navigation & Brand Hydration
+  // 3. Initialize Zone 2 2.5D Layered Card Stack & Spec Tabs
+  const zone2 = initZone2LayerStack({
+    onOpenConsultation: (opts) => zone5.openConsultationModal(opts),
+  });
+
+  // 4. Initialize Zone 3 Interactive Corporate Workflows & Before/After Explorer
+  initZone3Workflows({
+    onOpenConsultation: (opts) => zone5.openConsultationModal(opts),
+  });
+
+  // 5. Initialize Lenis + GSAP ScrollTrigger (scrub: 1.2) Motion Choreography
+  let navApi = null;
+  const scrollController = initScrollChoreography({
+    zone2Controller: zone2,
+    zone5Controller: zone5,
+    onZoneChange: (zoneId) => navApi?.setActiveZone(zoneId),
+    onScrollProgress: (pct) => navApi?.setScrollProgress(pct),
+  });
+
+  // 6. Initialize Header Navigation & Brand Hydration
   navApi = initNavigation({
     scrollController,
-    onOpenBooking: (opts) => zone5.openBookingModal(opts),
+    onOpenConsultation: (opts) => zone5.openConsultationModal(opts),
   });
 
-  // 5. Mount Zone 1 Lighting/Material Rig Switcher & 360° Orbit Controls
-  initZone1Controls(engine);
-
-  // 6. Mount Zone 2 Clickable 3D Hotspot Pins, SVG Hairline Leader Callouts & Live Spec Card
-  initZone2HotspotsAndCallouts(engine);
-
-  // 7. Mount Zone 3 Interactive Portal Switcher (Live-synced to 3D Kiosk OLED Display)
-  initZone3Portal(engine, {
-    onShowToast: showToast,
-    onOpenBooking: (opts) => zone5.openBookingModal(opts),
-  });
-
-  // 8. Mount Zone 4 Universal B2B Project Scope & Preconstruction ROI Estimator
+  // 7. Initialize Zone 4 Universal B2B Project Scope & Executive ROI Estimator
   initZone4Estimator({
     onShowToast: showToast,
-    onSendBriefToEngage: (briefPayload) => {
-      zone5.applyEstimatorBrief(briefPayload);
-      showToast('Scope brief synced to Engagement Configurator.');
+    onApplyToEngagement: (payload) => {
+      zone5.attachEstimatorScope(payload);
+      showToast('Scope summary applied to Engagement Options.');
       scrollController.scrollToTarget('#zone-engage');
     },
   });
 
-  // Expose debug handle cleanly on window for automated verification & telemetry inspection
-  window.__STUDIO_ENGINE__ = engine;
+  // Expose lightweight state handle for verification
+  window.__CORPORATE_STUDIO__ = {
+    zone2,
+    zone5,
+    scroll: scrollController,
+  };
 }
 
 if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', bootstrapStudioFlagship);
+  document.addEventListener('DOMContentLoaded', bootstrapCorporateShowcase);
 } else {
-  bootstrapStudioFlagship();
+  bootstrapCorporateShowcase();
 }

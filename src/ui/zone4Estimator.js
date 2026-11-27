@@ -1,25 +1,22 @@
 import {
-  ESTIMATOR_MODULES,
-  ESTIMATOR_PROJECT_TYPES,
+  ESTIMATOR_CAPABILITIES,
+  ESTIMATOR_SECTORS,
   ESTIMATOR_TIMELINES,
   STUDIO_CONFIG,
 } from '../config/studioConfig.js';
 
 /**
- * Zone 4 — Universal B2B App Centerpiece:
- * "Instant Project Scope & Preconstruction ROI Estimator"
- * Generates real-time budget bands, carry-cost savings, hours saved, timeline,
- * clipboard executive brief, downloadable Markdown brief, and 1-click handoff to Zone 5.
+ * Zone 4 — Institutional B2B Project Scope & Executive ROI Estimator
  */
-export function initZone4Estimator({ onShowToast, onSendBriefToEngage } = {}) {
+export function initZone4Estimator({ onShowToast, onApplyToEngagement } = {}) {
   const root = document.getElementById('estimator-app-root');
   if (!root) return;
 
   const state = {
-    projectTypeId: 'mixed-use',
-    sqft: 185000,
+    sectorId: 'cre',
+    scaleMillions: 125, // $25M to $500M
     timelineId: 'standard',
-    activeModules: new Set(ESTIMATOR_MODULES.filter((m) => m.defaultOn).map((m) => m.id)),
+    selectedCaps: new Set(ESTIMATOR_CAPABILITIES.filter((c) => c.defaultOn).map((c) => c.id)),
   };
 
   const currencyFmt = new Intl.NumberFormat('en-US', {
@@ -28,192 +25,202 @@ export function initZone4Estimator({ onShowToast, onSendBriefToEngage } = {}) {
     maximumFractionDigits: 0,
   });
 
-  const numberFmt = new Intl.NumberFormat('en-US');
+  const numFmt = new Intl.NumberFormat('en-US');
 
-  function formatCompactMoney(val) {
-    if (val >= 1_000_000) {
-      return `$${(val / 1_000_000).toFixed(2)}M`;
-    }
-    return `$${Math.round(val / 1000)}K`;
+  function formatCompact(n) {
+    if (n >= 1_000_000) return `$${(n / 1_000_000).toFixed(2)}M`;
+    return `$${Math.round(n / 1000)}K`;
   }
 
-  function calculateEstimate() {
-    const project = ESTIMATOR_PROJECT_TYPES.find((p) => p.id === state.projectTypeId) || ESTIMATOR_PROJECT_TYPES[0];
-    const timeline = ESTIMATOR_TIMELINES.find((t) => t.id === state.timelineId) || ESTIMATOR_TIMELINES[1];
+  function calculateModel() {
+    const sector =
+      ESTIMATOR_SECTORS.find((s) => s.id === state.sectorId) || ESTIMATOR_SECTORS[0];
+    const timeline =
+      ESTIMATOR_TIMELINES.find((t) => t.id === state.timelineId) || ESTIMATOR_TIMELINES[1];
 
-    let moduleCost = 0;
-    let moduleWeeks = 0;
-    let moduleHours = 0;
-    let valueMultiplier = 1.0;
+    let capCost = 0;
+    let capWeeks = 0;
+    let capHours = 0;
+    let roiMult = 1.0;
+    const activeCapItems = [];
 
-    const selectedModules = [];
-    ESTIMATOR_MODULES.forEach((m) => {
-      if (state.activeModules.has(m.id)) {
-        moduleCost += m.costAdd;
-        moduleWeeks += m.weeksAdd;
-        moduleHours += m.hoursAdd;
-        valueMultiplier *= m.valueBoost;
-        selectedModules.push(m);
+    ESTIMATOR_CAPABILITIES.forEach((cap) => {
+      if (state.selectedCaps.has(cap.id)) {
+        capCost += cap.costAdd;
+        capWeeks += cap.weeksAdd;
+        capHours += cap.hoursAdd;
+        roiMult *= cap.roiBoost;
+        activeCapItems.push(cap);
       }
     });
 
-    const scaleCost = state.sqft * project.sqftFactor;
-    const midInvestment = (project.baseCost + scaleCost + moduleCost) * timeline.multiplier;
-    const investLow = Math.round((midInvestment * 0.88) / 1000) * 1000;
-    const investHigh = Math.round((midInvestment * 1.14) / 1000) * 1000;
+    const rawMid =
+      (sector.baseInvestment + state.scaleMillions * sector.scaleCostFactor + capCost) *
+      timeline.multiplier;
+    const investLow = Math.round((rawMid * 0.88) / 1000) * 1000;
+    const investHigh = Math.round((rawMid * 1.12) / 1000) * 1000;
 
-    // Projected deal velocity / pre-leasing carry savings
-    const carryFactor = state.sqft / 100000;
-    const acceleratedCarrySavings = Math.round(
-      carryFactor * project.carryMonthlyPer100k * project.leaseAccelerationMonths * 0.42 * valueMultiplier
+    const annualValue = Math.round(
+      (48000 + state.scaleMillions * sector.annualValuePerUnit * 0.55) * roiMult
+    );
+    const hoursReclaimed = Math.round(
+      sector.hoursSavedBase + capHours + state.scaleMillions * 1.4
     );
 
-    const hoursSavedAnnual = Math.round(
-      (project.hoursSavedBase + moduleHours + (state.sqft / 50000) * 32)
-    );
-
-    const targetWeeks = Math.max(
+    const estWeeks = Math.max(
       3.5,
-      Number(((project.baseWeeks + moduleWeeks + (state.sqft > 350000 ? 1.2 : 0)) * timeline.weekFactor).toFixed(1))
+      Number(((sector.baseWeeks + capWeeks) * timeline.weekFactor).toFixed(1))
     );
 
-    // Allocation split across 3 engineering disciplines
-    const pct3D = state.activeModules.has('twin3d') ? 46 : 28;
-    const pctAI = state.activeModules.has('aiIntake') ? 26 : 16;
-    const pctInteractive = 100 - pct3D - pctAI;
+    const paybackMonths = Math.max(
+      1.8,
+      Number(((investHigh / Math.max(1, annualValue)) * 12).toFixed(1))
+    );
+
+    const pUx = state.selectedCaps.has('flagshipWeb') ? 38 : 24;
+    const pAi = state.selectedCaps.has('aiWorkflow') ? 32 : 18;
+    const pData = 100 - pUx - pAi;
 
     return {
-      project,
+      sector,
       timeline,
-      selectedModules,
+      activeCapItems,
       investLow,
       investHigh,
-      acceleratedCarrySavings,
-      hoursSavedAnnual,
-      targetWeeks,
-      alloc: { pct3D, pctInteractive, pctAI },
+      annualValue,
+      hoursReclaimed,
+      estWeeks,
+      paybackMonths,
+      phases: { pUx, pData, pAi },
     };
   }
 
-  function buildExecutiveBriefText(est) {
-    const dateStr = new Date().toISOString().split('T')[0];
-    const modList =
-      est.selectedModules.length > 0
-        ? est.selectedModules.map((m) => `- ${m.label}`).join('\n')
+  function buildExecutiveMemo(model) {
+    const today = new Date().toISOString().split('T')[0];
+    const capLines =
+      model.activeCapItems.length > 0
+        ? model.activeCapItems.map((c) => `- ${c.label}`).join('\n')
         : '- Core Executive Digital Platform';
 
-    return `# ${STUDIO_CONFIG.brandName} — EXECUTIVE PROJECT SCOPE & ROI BRIEF
-Generated: ${dateStr}
+    return `# ${STUDIO_CONFIG.brandName} — EXECUTIVE PROJECT SCOPE & ROI MEMORANDUM
+Date: ${today}
 
-## 1. Asset & Project Parameters
-- Project Category: ${est.project.label}
-- Gross Building Scale: ${numberFmt.format(state.sqft)} GSF
-- Delivery Cadence: ${est.timeline.label} (${est.timeline.badge})
+## 1. Organization & Scope Parameters
+- Sector: ${model.sector.label}
+- Operational / Portfolio Scale: $${state.scaleMillions}M
+- Target Delivery Cadence: ${model.timeline.label} (${model.timeline.note})
 
-## 2. Selected Interactive & Automation Modules
-${modList}
+## 2. Configured Platform Capabilities
+${capLines}
 
-## 3. Projected Investment & Preconstruction ROI
-- Estimated Studio Investment: ${currencyFmt.format(est.investLow)} – ${currencyFmt.format(est.investHigh)}
-- Projected Carry / Pre-Leasing Acceleration Value: +${formatCompactMoney(est.acceleratedCarrySavings)}
-- Executive & Preconstruction Hours Saved / Yr: ${numberFmt.format(est.hoursSavedAnnual)} hrs
-- Target Production Launch Window: ${est.targetWeeks} Weeks
+## 3. Investment & Projected Financial Return
+- Estimated Studio Investment: ${currencyFmt.format(model.investLow)} – ${currencyFmt.format(model.investHigh)}
+- Projected Annual Operational & Velocity Value: +${formatCompact(model.annualValue)} / yr
+- Leadership & Team Hours Reclaimed: ${numFmt.format(model.hoursReclaimed)} hrs / yr
+- Estimated Payback Horizon: ${model.paybackMonths} Months
+- Target Production Launch: ${model.estWeeks} Weeks
 
-## 4. Recommended Architectural Focus
-${est.project.deliverableFocus}
+## 4. Recommended Architecture
+${model.sector.recommendedArchitecture}
 
 ---
-Prepared via ${STUDIO_CONFIG.brandName} Interactive Scope Engine (${STUDIO_CONFIG.contactEmail})
+Prepared via ${STUDIO_CONFIG.brandName} (${STUDIO_CONFIG.contactEmail})
 `;
   }
 
-  function updateOutputsOnly() {
-    const est = calculateEstimate();
-    const set = (id, text) => {
+  function refreshOutputs() {
+    const m = calculateModel();
+    const setText = (id, val) => {
       const el = document.getElementById(id);
-      if (el) el.textContent = text;
+      if (el) el.textContent = val;
     };
 
-    set('est-sqft-readout', `${numberFmt.format(state.sqft)} GSF`);
-    set('est-price-range', `${currencyFmt.format(est.investLow)} – ${currencyFmt.format(est.investHigh)}`);
-    set('est-timeline-badge', `${est.timeline.badge} · Target Launch: ${est.targetWeeks} Weeks`);
-    set('est-carry-savings', `+${formatCompactMoney(est.acceleratedCarrySavings)}`);
-    set('est-hours-saved', `${numberFmt.format(est.hoursSavedAnnual)} hrs/yr`);
-    set('est-weeks-out', `${est.targetWeeks} Wks`);
-    set('est-roi-multiple', `${(est.acceleratedCarrySavings / Math.max(1, est.investHigh)).toFixed(1)}x Value Ratio`);
-    set('est-focus-text', est.project.deliverableFocus);
+    setText('est-scale-label', m.sector.scaleUnitLabel);
+    setText('est-scale-val', `$${state.scaleMillions}M`);
+    setText(
+      'est-investment-range',
+      `${currencyFmt.format(m.investLow)} – ${currencyFmt.format(m.investHigh)}`
+    );
+    setText('est-delivery-caption', `${m.timeline.note} · Target Launch in ${m.estWeeks} Weeks`);
+    setText('est-annual-value', `+${formatCompact(m.annualValue)} / yr`);
+    setText('est-hours-reclaimed', `${numFmt.format(m.hoursReclaimed)} hrs / yr`);
+    setText('est-payback', `${m.paybackMonths} Months`);
+    setText('est-launch-wks', `${m.estWeeks} Weeks`);
+    setText('est-rec-copy', m.sector.recommendedArchitecture);
 
-    const seg1 = document.getElementById('est-alloc-1');
-    const seg2 = document.getElementById('est-alloc-2');
-    const seg3 = document.getElementById('est-alloc-3');
-    if (seg1) seg1.style.width = `${est.alloc.pct3D}%`;
-    if (seg2) seg2.style.width = `${est.alloc.pctInteractive}%`;
-    if (seg3) seg3.style.width = `${est.alloc.pctAI}%`;
+    const s1 = document.getElementById('phase-seg-1');
+    const s2 = document.getElementById('phase-seg-2');
+    const s3 = document.getElementById('phase-seg-3');
+    if (s1) s1.style.width = `${m.phases.pUx}%`;
+    if (s2) s2.style.width = `${m.phases.pData}%`;
+    if (s3) s3.style.width = `${m.phases.pAi}%`;
 
-    set('est-legend-1', `3D WebGL ${est.alloc.pct3D}%`);
-    set('est-legend-2', `Portal & UX ${est.alloc.pctInteractive}%`);
-    set('est-legend-3', `AI & QA ${est.alloc.pctAI}%`);
+    setText('phase-leg-1', `Editorial UX ${m.phases.pUx}%`);
+    setText('phase-leg-2', `Portal & Data ${m.phases.pData}%`);
+    setText('phase-leg-3', `AI & Integrations ${m.phases.pAi}%`);
 
-    // Update preset chips active highlight
-    root.querySelectorAll('[data-sqft-preset]').forEach((chip) => {
-      chip.classList.toggle('is-active', Number(chip.dataset.sqftPreset) === state.sqft);
+    root.querySelectorAll('[data-scale-preset]').forEach((btn) => {
+      btn.classList.toggle('is-active', Number(btn.dataset.scalePreset) === state.scaleMillions);
     });
   }
 
-  function renderFull() {
-    const sqftPresets = [35000, 120000, 185000, 350000, 600000];
+  function render() {
+    const presets = [50, 125, 250, 500];
+    const currentSector =
+      ESTIMATOR_SECTORS.find((s) => s.id === state.sectorId) || ESTIMATOR_SECTORS[0];
 
     root.innerHTML = `
-      <!-- Left: Interactive Configuration Inputs -->
-      <div class="estimator-inputs-card surface-glass">
-        <div class="est-section">
-          <div class="est-section-head">
-            <span class="mono-label">01 // SELECT PROJECT TYPE</span>
-            <span class="mono-accent">COMMERCIAL BENCHMARK</span>
+      <!-- Left: Executive Configuration Controls -->
+      <div class="estimator-form-card elevation-card">
+        <div class="est-block">
+          <div class="est-block-header">
+            <span class="est-step-label">01 &middot; Business Sector</span>
           </div>
-          <div class="project-type-grid" role="radiogroup" aria-label="Project type">
-            ${ESTIMATOR_PROJECT_TYPES.map(
-              (pt) => `
+          <div class="sector-grid" role="radiogroup" aria-label="Business sector">
+            ${ESTIMATOR_SECTORS.map(
+              (sec) => `
                 <button
                   type="button"
                   role="radio"
-                  aria-checked="${state.projectTypeId === pt.id}"
-                  class="type-option-card ${state.projectTypeId === pt.id ? 'is-active' : ''}"
-                  data-project-type="${pt.id}"
-                  id="est-type-${pt.id}"
+                  aria-checked="${sec.id === state.sectorId}"
+                  class="sector-card-btn ${sec.id === state.sectorId ? 'is-active' : ''}"
+                  data-sector-id="${sec.id}"
+                  id="est-sector-${sec.id}"
                 >
-                  <strong>${pt.label}</strong>
-                  <span>Base ${formatCompactMoney(pt.baseCost)} · ${pt.baseWeeks} wks</span>
+                  <strong>${sec.shortLabel}</strong>
+                  <span>Base ${formatCompact(sec.baseInvestment)} &middot; ~${sec.baseWeeks} wks</span>
                 </button>
               `
             ).join('')}
           </div>
         </div>
 
-        <div class="est-section">
-          <div class="est-section-head">
-            <label for="est-sqft-slider" class="mono-label">02 // GROSS SQUARE FOOTAGE / ASSET SCALE</label>
-            <span id="est-sqft-readout" class="sqft-display-value">${numberFmt.format(state.sqft)} GSF</span>
+        <div class="est-block">
+          <div class="est-block-header">
+            <label for="est-scale-slider" id="est-scale-label" class="est-step-label">
+              02 &middot; ${currentSector.scaleUnitLabel}
+            </label>
+            <strong id="est-scale-val" class="scale-readout">$${state.scaleMillions}M</strong>
           </div>
           <input
             type="range"
-            id="est-sqft-slider"
-            class="range-slider"
-            min="25000"
-            max="750000"
-            step="5000"
-            value="${state.sqft}"
+            id="est-scale-slider"
+            class="corporate-slider"
+            min="25"
+            max="500"
+            step="25"
+            value="${state.scaleMillions}"
           />
-          <div class="preset-row">
-            ${sqftPresets
+          <div class="preset-chips">
+            ${presets
               .map(
                 (val) => `
                   <button
                     type="button"
-                    class="preset-chip ${state.sqft === val ? 'is-active' : ''}"
-                    data-sqft-preset="${val}"
+                    class="preset-btn ${val === state.scaleMillions ? 'is-active' : ''}"
+                    data-scale-preset="${val}"
                   >
-                    ${val / 1000}K SF
+                    $${val}M${val === 500 ? '+' : ''}
                   </button>
                 `
               )
@@ -221,20 +228,21 @@ Prepared via ${STUDIO_CONFIG.brandName} Interactive Scope Engine (${STUDIO_CONFI
           </div>
         </div>
 
-        <div class="est-section">
-          <div class="est-section-head">
-            <span class="mono-label">03 // TARGET LAUNCH TIMELINE</span>
+        <div class="est-block">
+          <div class="est-block-header">
+            <span class="est-step-label">03 &middot; Target Delivery Horizon</span>
           </div>
-          <div class="segmented-control" role="radiogroup" aria-label="Target timeline">
+          <div class="timeline-grid-3" role="radiogroup" aria-label="Target delivery horizon">
             ${ESTIMATOR_TIMELINES.map(
               (tl) => `
                 <button
                   type="button"
                   role="radio"
-                  aria-checked="${state.timelineId === tl.id}"
-                  class="seg-btn ${state.timelineId === tl.id ? 'is-active' : ''}"
-                  data-timeline="${tl.id}"
-                  id="est-timeline-${tl.id}"
+                  aria-checked="${tl.id === state.timelineId}"
+                  class="preset-btn ${tl.id === state.timelineId ? 'is-active' : ''}"
+                  style="padding:10px 8px;text-align:center"
+                  data-timeline-id="${tl.id}"
+                  id="est-tl-${tl.id}"
                 >
                   ${tl.label}
                 </button>
@@ -243,27 +251,27 @@ Prepared via ${STUDIO_CONFIG.brandName} Interactive Scope Engine (${STUDIO_CONFI
           </div>
         </div>
 
-        <div class="est-section">
-          <div class="est-section-head">
-            <span class="mono-label">04 // INTERACTIVE CAPABILITY MODULES</span>
-            <span class="mono-label">MULTI-SELECT</span>
+        <div class="est-block">
+          <div class="est-block-header">
+            <span class="est-step-label">04 &middot; Included Platform Capabilities</span>
+            <span style="font-size:11px;color:var(--text-muted)">Select all required</span>
           </div>
-          <div class="module-check-grid">
-            ${ESTIMATOR_MODULES.map((m) => {
-              const active = state.activeModules.has(m.id);
+          <div class="capability-list">
+            ${ESTIMATOR_CAPABILITIES.map((cap) => {
+              const on = state.selectedCaps.has(cap.id);
               return `
                 <button
                   type="button"
-                  class="module-toggle-row ${active ? 'is-active' : ''}"
-                  aria-pressed="${active}"
-                  data-module-id="${m.id}"
-                  id="est-mod-${m.id}"
+                  class="capability-row ${on ? 'is-active' : ''}"
+                  aria-pressed="${on}"
+                  data-cap-id="${cap.id}"
+                  id="est-cap-${cap.id}"
                 >
-                  <span class="module-toggle-left">
-                    <span class="check-box">${active ? '✓' : ''}</span>
-                    <span>${m.label}</span>
+                  <span class="cap-left">
+                    <span class="cap-check">${on ? '✓' : ''}</span>
+                    <span>${cap.label}</span>
                   </span>
-                  <span class="module-cost-tag">+${formatCompactMoney(m.costAdd)}</span>
+                  <span class="cap-price">+${formatCompact(cap.costAdd)}</span>
                 </button>
               `;
             }).join('')}
@@ -271,187 +279,180 @@ Prepared via ${STUDIO_CONFIG.brandName} Interactive Scope Engine (${STUDIO_CONFI
         </div>
       </div>
 
-      <!-- Right: Live Executive Output & Brief Export Card -->
-      <div class="estimator-output-card surface-glass" aria-live="polite">
-        <div class="output-hero-metric">
-          <span class="mono-accent">LIVE STUDIO INVESTMENT ESTIMATE</span>
-          <div id="est-price-range" class="output-price-range"></div>
-          <div id="est-timeline-badge" class="mono-label"></div>
+      <!-- Right: Live Executive Financial & ROI Output -->
+      <div class="estimator-summary-card elevation-card" aria-live="polite">
+        <div class="est-investment-head">
+          <span class="eyebrow" style="margin-bottom:4px;display:block">Estimated Studio Investment</span>
+          <div id="est-investment-range" class="est-investment-figure"></div>
+          <p id="est-delivery-caption" class="est-delivery-note"></p>
         </div>
 
-        <div class="output-roi-grid">
-          <div class="roi-box">
-            <span class="mono-label">PROJECTED CARRY / LEASE VALUE</span>
-            <div id="est-carry-savings" class="roi-box-value positive"></div>
+        <div class="est-roi-grid">
+          <div class="est-roi-cell">
+            <span>Projected Annual Value</span>
+            <strong id="est-annual-value" class="sage"></strong>
           </div>
-          <div class="roi-box">
-            <span class="mono-label">PRECON HOURS SAVED</span>
-            <div id="est-hours-saved" class="roi-box-value cyan"></div>
+          <div class="est-roi-cell">
+            <span>Hours Reclaimed / Yr</span>
+            <strong id="est-hours-reclaimed"></strong>
           </div>
-          <div class="roi-box">
-            <span class="mono-label">ESTIMATED DELIVERY</span>
-            <div id="est-weeks-out" class="roi-box-value"></div>
+          <div class="est-roi-cell">
+            <span>Estimated Payback</span>
+            <strong id="est-payback" class="champagne"></strong>
           </div>
-          <div class="roi-box">
-            <span class="mono-label">PROJECTED IMPACT RATIO</span>
-            <div id="est-roi-multiple" class="roi-box-value" style="color:var(--amber-bright)"></div>
+          <div class="est-roi-cell">
+            <span>Production Window</span>
+            <strong id="est-launch-wks"></strong>
           </div>
         </div>
 
         <div>
-          <span class="mono-label">ENGINEERING EFFORT ALLOCATION</span>
-          <div class="allocation-bar">
-            <div id="est-alloc-1" class="alloc-seg-1"></div>
-            <div id="est-alloc-2" class="alloc-seg-2"></div>
-            <div id="est-alloc-3" class="alloc-seg-3"></div>
+          <span class="preview-sub-label">Engineering Allocation</span>
+          <div class="phase-bar">
+            <div id="phase-seg-1" class="phase-seg-1"></div>
+            <div id="phase-seg-2" class="phase-seg-2"></div>
+            <div id="phase-seg-3" class="phase-seg-3"></div>
           </div>
-          <div class="allocation-legend">
-            <span id="est-legend-1"></span>
-            <span id="est-legend-2"></span>
-            <span id="est-legend-3"></span>
+          <div class="phase-legend">
+            <span id="phase-leg-1"></span>
+            <span id="phase-leg-2"></span>
+            <span id="phase-leg-3"></span>
           </div>
         </div>
 
-        <div class="brief-focus-box">
-          <span class="mono-label" style="display:block;margin-bottom:5px">RECOMMENDED ARCHITECTURE</span>
-          <span id="est-focus-text"></span>
+        <div class="est-architecture-rec">
+          <strong style="display:block;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;color:var(--accent-champagne);margin-bottom:4px">
+            Recommended Blueprint
+          </strong>
+          <span id="est-rec-copy"></span>
         </div>
 
-        <div class="output-actions">
-          <div class="output-actions-row">
-            <button type="button" id="est-copy-brief-btn" class="btn btn-ghost">
-              Copy Executive Brief
+        <div class="est-export-actions">
+          <div class="est-export-pair">
+            <button type="button" id="est-copy-memo-btn" class="btn btn-secondary">
+              Copy Executive Summary
             </button>
-            <button type="button" id="est-download-brief-btn" class="btn btn-ghost">
-              Download Brief (.md)
+            <button type="button" id="est-download-memo-btn" class="btn btn-secondary">
+              Download Memo (.md)
             </button>
           </div>
-          <button type="button" id="est-send-engage-btn" class="btn btn-amber btn-full">
-            Lock Scope &amp; Configure Studio Engagement →
+          <button type="button" id="est-apply-engage-btn" class="btn btn-champagne btn-full">
+            Apply Scope to Engagement Options &rarr;
           </button>
         </div>
       </div>
     `;
 
-    // Bind project type buttons
-    root.querySelectorAll('[data-project-type]').forEach((btn) => {
+    // Sector selection
+    root.querySelectorAll('[data-sector-id]').forEach((btn) => {
       btn.addEventListener('click', () => {
-        state.projectTypeId = btn.dataset.projectType;
-        root.querySelectorAll('[data-project-type]').forEach((b) => {
-          const on = b.dataset.projectType === state.projectTypeId;
-          b.classList.toggle('is-active', on);
-          b.setAttribute('aria-checked', String(on));
+        state.sectorId = btn.dataset.sectorId;
+        root.querySelectorAll('[data-sector-id]').forEach((b) => {
+          const active = b.dataset.sectorId === state.sectorId;
+          b.classList.toggle('is-active', active);
+          b.setAttribute('aria-checked', String(active));
         });
-        updateOutputsOnly();
+        refreshOutputs();
       });
     });
 
-    // Bind range slider
-    const slider = root.querySelector('#est-sqft-slider');
-    if (slider) {
-      slider.addEventListener('input', (e) => {
-        state.sqft = Number(e.target.value);
-        updateOutputsOnly();
-      });
-    }
+    // Scale slider & presets
+    const slider = root.querySelector('#est-scale-slider');
+    slider?.addEventListener('input', (e) => {
+      state.scaleMillions = Number(e.target.value);
+      refreshOutputs();
+    });
 
-    // Bind quick square-footage presets
-    root.querySelectorAll('[data-sqft-preset]').forEach((btn) => {
+    root.querySelectorAll('[data-scale-preset]').forEach((btn) => {
       btn.addEventListener('click', () => {
-        state.sqft = Number(btn.dataset.sqftPreset);
-        if (slider) slider.value = String(state.sqft);
-        updateOutputsOnly();
+        state.scaleMillions = Number(btn.dataset.scalePreset);
+        if (slider) slider.value = String(state.scaleMillions);
+        refreshOutputs();
       });
     });
 
-    // Bind timeline selector
-    root.querySelectorAll('[data-timeline]').forEach((btn) => {
+    // Timeline selection
+    root.querySelectorAll('[data-timeline-id]').forEach((btn) => {
       btn.addEventListener('click', () => {
-        state.timelineId = btn.dataset.timeline;
-        root.querySelectorAll('[data-timeline]').forEach((b) => {
-          const on = b.dataset.timeline === state.timelineId;
-          b.classList.toggle('is-active', on);
-          b.setAttribute('aria-checked', String(on));
+        state.timelineId = btn.dataset.timelineId;
+        root.querySelectorAll('[data-timeline-id]').forEach((b) => {
+          const active = b.dataset.timelineId === state.timelineId;
+          b.classList.toggle('is-active', active);
+          b.setAttribute('aria-checked', String(active));
         });
-        updateOutputsOnly();
+        refreshOutputs();
       });
     });
 
-    // Bind capability module toggles
-    root.querySelectorAll('[data-module-id]').forEach((btn) => {
+    // Capability toggles
+    root.querySelectorAll('[data-cap-id]').forEach((btn) => {
       btn.addEventListener('click', () => {
-        const id = btn.dataset.moduleId;
-        if (state.activeModules.has(id)) {
-          state.activeModules.delete(id);
+        const id = btn.dataset.capId;
+        if (state.selectedCaps.has(id)) {
+          state.selectedCaps.delete(id);
         } else {
-          state.activeModules.add(id);
+          state.selectedCaps.add(id);
         }
-        const active = state.activeModules.has(id);
-        btn.classList.toggle('is-active', active);
-        btn.setAttribute('aria-pressed', String(active));
-        const box = btn.querySelector('.check-box');
-        if (box) box.textContent = active ? '✓' : '';
-        updateOutputsOnly();
+        const on = state.selectedCaps.has(id);
+        btn.classList.toggle('is-active', on);
+        btn.setAttribute('aria-pressed', String(on));
+        const check = btn.querySelector('.cap-check');
+        if (check) check.textContent = on ? '✓' : '';
+        refreshOutputs();
       });
     });
 
-    // Copy Executive Brief
-    root.querySelector('#est-copy-brief-btn')?.addEventListener('click', async () => {
-      const est = calculateEstimate();
-      const text = buildExecutiveBriefText(est);
+    // Copy Executive Summary
+    root.querySelector('#est-copy-memo-btn')?.addEventListener('click', async () => {
+      const memo = buildExecutiveMemo(calculateModel());
       try {
-        await navigator.clipboard.writeText(text);
-        onShowToast?.('Executive Project Scope Brief copied to clipboard.');
+        await navigator.clipboard.writeText(memo);
       } catch {
-        // Fallback textarea copy
         const ta = document.createElement('textarea');
-        ta.value = text;
+        ta.value = memo;
         ta.style.position = 'fixed';
         ta.style.opacity = '0';
         document.body.appendChild(ta);
         ta.select();
         document.execCommand('copy');
         document.body.removeChild(ta);
-        onShowToast?.('Executive Project Scope Brief copied to clipboard.');
       }
+      onShowToast?.('Executive Scope Memorandum copied to clipboard.');
     });
 
-    // Download Brief (.md)
-    root.querySelector('#est-download-brief-btn')?.addEventListener('click', () => {
-      const est = calculateEstimate();
-      const text = buildExecutiveBriefText(est);
-      const blob = new Blob([text], { type: 'text/markdown;charset=utf-8' });
+    // Download Memo
+    root.querySelector('#est-download-memo-btn')?.addEventListener('click', () => {
+      const m = calculateModel();
+      const memo = buildExecutiveMemo(m);
+      const blob = new Blob([memo], { type: 'text/markdown;charset=utf-8' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `${STUDIO_CONFIG.brandShort.toLowerCase()}-scope-brief-${est.project.id}.md`;
+      a.download = `executive-scope-memo-${m.sector.id}.md`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
-      onShowToast?.('Downloaded Executive Scope Brief (.md).');
+      onShowToast?.('Executive Scope Memorandum downloaded.');
     });
 
-    // Send Brief to Zone 5 Engagement Configurator
-    root.querySelector('#est-send-engage-btn')?.addEventListener('click', () => {
-      const est = calculateEstimate();
-      const summary = `${est.project.label} · ${numberFmt.format(state.sqft)} GSF · Est. ${currencyFmt.format(
-        est.investLow
-      )}–${currencyFmt.format(est.investHigh)} (${est.targetWeeks} wks)`;
-      onSendBriefToEngage?.({
-        summary,
-        recommendedTierId: state.activeModules.has('aiIntake') && !state.activeModules.has('twin3d')
-          ? 'workflow'
-          : 'flagship',
-      });
+    // Apply Scope to Zone 5 Engagement
+    root.querySelector('#est-apply-engage-btn')?.addEventListener('click', () => {
+      const m = calculateModel();
+      const summary = `${m.sector.shortLabel} ($${state.scaleMillions}M Scale) · Est. ${currencyFmt.format(
+        m.investLow
+      )}–${currencyFmt.format(m.investHigh)} · ${m.estWeeks} Weeks`;
+      const recommendedTierId =
+        state.selectedCaps.has('aiWorkflow') && !state.selectedCaps.has('flagshipWeb')
+          ? 'ai-suite'
+          : 'flagship';
+      onApplyToEngagement?.({ summary, recommendedTierId });
     });
 
-    updateOutputsOnly();
+    refreshOutputs();
   }
 
-  renderFull();
+  render();
 
-  return {
-    getCurrentEstimate: calculateEstimate,
-  };
+  return { calculateModel };
 }

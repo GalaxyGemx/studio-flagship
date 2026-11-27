@@ -6,18 +6,24 @@ import 'lenis/dist/lenis.css';
 gsap.registerPlugin(ScrollTrigger);
 
 /**
- * Sets up Lenis weighted smooth scroll synchronized with GSAP ScrollTrigger (scrub: 1.2)
- * to drive all 5 zones, camera staging, exploded teardowns, and magnetic reassembly.
+ * Corporate Luxury Motion Choreography Engine (Lenis + GSAP ScrollTrigger scrub: 1.2)
+ * Drives weighted scroll inertia, 2.5D layered card deconstruction, workflow progress,
+ * and magnetic system card reassembly at 60 FPS.
  */
-export function initScrollChoreography(engine, { onZoneChange, onScrollPercent } = {}) {
+export function initScrollChoreography({
+  zone2Controller,
+  zone5Controller,
+  onZoneChange,
+  onScrollProgress,
+} = {}) {
   const lenis = new Lenis({
-    duration: 1.2,
+    duration: 1.18,
     easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
     orientation: 'vertical',
     gestureOrientation: 'vertical',
     smoothWheel: true,
     wheelMultiplier: 0.95,
-    touchMultiplier: 1.45,
+    touchMultiplier: 1.35,
   });
 
   lenis.on('scroll', ScrollTrigger.update);
@@ -28,139 +34,148 @@ export function initScrollChoreography(engine, { onZoneChange, onScrollPercent }
   gsap.ticker.lagSmoothing(0);
 
   const z2Fill = document.getElementById('z2-scrub-fill');
-  const z2Readout = document.getElementById('z2-scrub-readout');
-  const z3Fill = document.getElementById('z3-scrub-fill');
-  const z3Readout = document.getElementById('z3-scrub-readout');
-  const z5Fill = document.getElementById('z5-scrub-fill');
-  const z5Readout = document.getElementById('z5-scrub-readout');
+  const z2Pct = document.getElementById('z2-scrub-pct');
+  const z3Bar = document.getElementById('z3-workflow-bar');
+  const heroStage = document.getElementById('hero-parallax-stage');
 
   const zones = [
-    { id: 1, key: 'z1', el: document.getElementById('zone-hero') },
-    { id: 2, key: 'z2', el: document.getElementById('zone-structural') },
-    { id: 3, key: 'z3', el: document.getElementById('zone-hardware') },
-    { id: 4, key: 'z4', el: document.getElementById('zone-estimator') },
-    { id: 5, key: 'z5', el: document.getElementById('zone-engage') },
+    { id: 1, el: document.getElementById('zone-hero') },
+    { id: 2, el: document.getElementById('zone-architecture') },
+    { id: 3, el: document.getElementById('zone-workflows') },
+    { id: 4, el: document.getElementById('zone-estimator') },
+    { id: 5, el: document.getElementById('zone-engage') },
   ];
 
-  // Smooth target weights that update every scroll frame based on viewport intersection
-  function updateZoneWeights() {
-    const vh = window.innerHeight;
-    const viewportMid = vh * 0.5;
-    let bestZone = 1;
-    let bestScore = -1;
+  let activeZoneId = 1;
 
-    zones.forEach((z) => {
-      if (!z.el) return;
+  function syncGlobalScroll() {
+    const midY = window.innerHeight * 0.45;
+    let foundZone = activeZoneId;
+
+    for (const z of zones) {
+      if (!z.el) continue;
       const rect = z.el.getBoundingClientRect();
-      // Compute smooth overlap weight (0 outside, 1 when occupying center of viewport)
-      let weight = 0;
-      if (rect.top <= viewportMid && rect.bottom >= viewportMid) {
-        weight = 1;
-      } else if (rect.top > viewportMid && rect.top < vh * 1.15) {
-        weight = 1 - (rect.top - viewportMid) / (vh * 0.65);
-      } else if (rect.bottom < viewportMid && rect.bottom > -vh * 0.15) {
-        weight = 1 - (viewportMid - rect.bottom) / (vh * 0.65);
+      if (rect.top <= midY && rect.bottom >= midY) {
+        foundZone = z.id;
+        break;
       }
-      weight = Math.max(0, Math.min(1, weight));
-      engine.state.zoneWeights[z.key] = weight;
+    }
 
-      if (weight > bestScore) {
-        bestScore = weight;
-        bestZone = z.id;
-      }
-    });
-
-    if (engine.state.activeZone !== bestZone) {
-      engine.state.activeZone = bestZone;
-      onZoneChange?.(bestZone);
+    if (foundZone !== activeZoneId) {
+      activeZoneId = foundZone;
+      onZoneChange?.(activeZoneId);
     }
 
     const maxScroll = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
-    const pct = Math.min(100, Math.max(0, Math.round((window.scrollY / maxScroll) * 100)));
-    onScrollPercent?.(pct);
+    const pct = Math.max(0, Math.min(100, (window.scrollY / maxScroll) * 100));
+    onScrollProgress?.(pct);
   }
 
-  // Global scroll progress listener
   ScrollTrigger.create({
     trigger: document.body,
     start: 'top top',
     end: 'bottom bottom',
-    onUpdate: updateZoneWeights,
+    onUpdate: syncGlobalScroll,
   });
 
-  // Zone 2 — Mini-Teardown #1 (15-piece vertical structural explosion, scrub: 1.2)
-  const z2Proxy = { val: 0 };
-  gsap.to(z2Proxy, {
-    val: 1,
+  // Zone 1 — Subtle editorial elevation parallax on desktop
+  if (heroStage && window.innerWidth > 1080) {
+    gsap.to(heroStage, {
+      y: -34,
+      ease: 'none',
+      scrollTrigger: {
+        trigger: '#zone-hero',
+        start: 'top top',
+        end: 'bottom top',
+        scrub: 1.2,
+      },
+    });
+  }
+
+  // Zone 2 — Scroll-Scrubbed 2.5D Layer Teardown (scrub: 1.2)
+  const z2State = { progress: 0 };
+  gsap.to(z2State, {
+    progress: 1,
     ease: 'none',
     onUpdate: () => {
-      engine.state.z2Explode = z2Proxy.val;
-      const pct = Math.round(z2Proxy.val * 100);
+      zone2Controller?.setDeconstructProgress(z2State.progress);
+      const pct = Math.round(z2State.progress * 100);
       if (z2Fill) z2Fill.style.width = `${pct}%`;
-      if (z2Readout) z2Readout.textContent = `${String(pct).padStart(2, '0')}%`;
+      if (z2Pct) z2Pct.textContent = `${pct}%`;
     },
     scrollTrigger: {
-      trigger: '#zone-structural',
-      start: 'top 65%',
-      end: 'bottom 85%',
+      trigger: '#zone-architecture',
+      start: 'top 60%',
+      end: 'bottom 90%',
       scrub: 1.2,
     },
   });
 
-  // Zone 3 — Mini-Teardown #2 (15-piece Z-axis hardware explosion, scrub: 1.2)
-  const z3Proxy = { val: 0 };
-  gsap.to(z3Proxy, {
-    val: 1,
+  // Zone 3 — Scroll-Synced Workflow Progress Rail (scrub: 1.0)
+  const z3State = { progress: 0.33 };
+  gsap.to(z3State, {
+    progress: 1,
     ease: 'none',
     onUpdate: () => {
-      engine.state.z3Explode = z3Proxy.val;
-      const pct = Math.round(z3Proxy.val * 100);
-      if (z3Fill) z3Fill.style.width = `${pct}%`;
-      if (z3Readout) z3Readout.textContent = `${String(pct).padStart(2, '0')}%`;
+      if (z3Bar) {
+        z3Bar.style.width = `${Math.round(z3State.progress * 100)}%`;
+      }
     },
     scrollTrigger: {
-      trigger: '#zone-hardware',
-      start: 'top 65%',
-      end: 'bottom 85%',
-      scrub: 1.2,
+      trigger: '#zone-workflows',
+      start: 'top 75%',
+      end: 'bottom 65%',
+      scrub: 1.0,
     },
   });
 
-  // Zone 5 — Magnetic Reassembly into Unified Studio Emblem (scrub: 1.2)
-  const z5Proxy = { val: 0 };
-  gsap.to(z5Proxy, {
-    val: 1,
+  // Zone 5 — Scroll-Scrubbed Magnetic System Card Assembly (scrub: 1.2)
+  const z5State = { progress: 0 };
+  gsap.to(z5State, {
+    progress: 1,
     ease: 'none',
     onUpdate: () => {
-      engine.state.z5Reassemble = z5Proxy.val;
-      const pct = Math.round(z5Proxy.val * 100);
-      if (z5Fill) z5Fill.style.width = `${pct}%`;
-      if (z5Readout) z5Readout.textContent = `${String(pct).padStart(2, '0')}%`;
+      zone5Controller?.setAssemblyProgress(z5State.progress);
     },
     scrollTrigger: {
       trigger: '#zone-engage',
       start: 'top 80%',
-      end: 'bottom 115%',
+      end: 'bottom 118%',
       scrub: 1.2,
     },
   });
 
-  // Initial sync
-  updateZoneWeights();
+  // Subtle entrance reveal on editorial headers
+  gsap.utils.toArray('.section-header-split, .section-header-centered').forEach((header) => {
+    gsap.fromTo(
+      header,
+      { opacity: 0, y: 22 },
+      {
+        opacity: 1,
+        y: 0,
+        duration: 0.7,
+        ease: 'power2.out',
+        scrollTrigger: {
+          trigger: header,
+          start: 'top 86%',
+          once: true,
+        },
+      }
+    );
+  });
+
+  syncGlobalScroll();
 
   return {
     lenis,
+    state: { z2State, z3State, z5State },
     scrollToTarget(selector) {
       const target = document.querySelector(selector);
       if (!target) return;
       lenis.scrollTo(target, {
-        offset: selector === '#zone-hero' ? 0 : -12,
-        duration: 1.35,
+        offset: selector === '#zone-hero' ? 0 : -16,
+        duration: 1.25,
       });
-    },
-    refresh() {
-      ScrollTrigger.refresh();
-      updateZoneWeights();
     },
   };
 }

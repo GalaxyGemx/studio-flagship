@@ -1,37 +1,27 @@
 import { STUDIO_CONFIG } from '../config/studioConfig.js';
 
 /**
- * Wires top architectural navbar, mobile menu drawer, smooth anchor scroll via Lenis,
- * brand name hydration from STUDIO_CONFIG, and global toast helper.
+ * Institutional Header Navigation, Brand Hydration & Toast Utility
  */
-export function initNavigation({ scrollController, onOpenBooking } = {}) {
-  // Hydrate single-source brand strings
-  document.querySelectorAll('[data-studio-brand]').forEach((el) => {
+export function initNavigation({ scrollController, onOpenConsultation } = {}) {
+  document.querySelectorAll('[data-brand-name]').forEach((el) => {
     el.textContent = STUDIO_CONFIG.brandName;
   });
-  document.querySelectorAll('[data-studio-regions]').forEach((el) => {
-    el.textContent = STUDIO_CONFIG.regions;
+  document.querySelectorAll('[data-brand-offices]').forEach((el) => {
+    el.textContent = STUDIO_CONFIG.offices;
   });
-  document.querySelectorAll('[data-ref-project]').forEach((el) => {
-    el.textContent = STUDIO_CONFIG.referenceAsset.projectName;
+  document.querySelectorAll('[data-brand-email]').forEach((el) => {
+    el.textContent = STUDIO_CONFIG.contactEmail;
   });
 
-  const navLinks = document.querySelectorAll('[data-zone-link]');
-  const mobileBtn = document.getElementById('mobile-menu-toggle');
+  const navItems = document.querySelectorAll('[data-zone-link]');
+  const progressBar = document.getElementById('header-scroll-bar');
+  const mobileBtn = document.getElementById('mobile-menu-btn');
   const mobileDrawer = document.getElementById('mobile-nav-drawer');
-  const navBookBtn = document.getElementById('nav-book-btn');
-  const mobileBookBtn = document.getElementById('mobile-drawer-book');
-  const pctEl = document.getElementById('nav-scroll-pct');
+  const consultBtn = document.getElementById('nav-consult-btn');
+  const mobileConsultBtn = document.getElementById('mobile-consult-btn');
 
-  const zoneIdToSelector = {
-    1: '#zone-hero',
-    2: '#zone-structural',
-    3: '#zone-hardware',
-    4: '#zone-estimator',
-    5: '#zone-engage',
-  };
-
-  function closeMobileDrawer() {
+  function closeDrawer() {
     if (!mobileDrawer || !mobileBtn) return;
     mobileDrawer.hidden = true;
     mobileBtn.setAttribute('aria-expanded', 'false');
@@ -39,51 +29,49 @@ export function initNavigation({ scrollController, onOpenBooking } = {}) {
 
   mobileBtn?.addEventListener('click', () => {
     if (!mobileDrawer) return;
-    const isOpen = !mobileDrawer.hidden;
-    mobileDrawer.hidden = isOpen;
-    mobileBtn.setAttribute('aria-expanded', String(!isOpen));
+    const willOpen = mobileDrawer.hidden;
+    mobileDrawer.hidden = !willOpen;
+    mobileBtn.setAttribute('aria-expanded', String(willOpen));
   });
 
-  // Smooth scroll for every zone link & hero anchor CTA
-  document.querySelectorAll('a[href^="#zone-"], button[data-zone-link]').forEach((el) => {
-    el.addEventListener('click', (e) => {
-      const href = el.getAttribute('href');
-      const zoneNum = el.dataset.zoneLink;
-      const targetSelector = href && href.startsWith('#') ? href : zoneIdToSelector[zoneNum];
-      if (!targetSelector) return;
+  document.querySelectorAll('a[href^="#zone-"]').forEach((anchor) => {
+    anchor.addEventListener('click', (e) => {
+      const href = anchor.getAttribute('href');
+      if (!href) return;
       e.preventDefault();
-      closeMobileDrawer();
-      scrollController?.scrollToTarget(targetSelector);
+      closeDrawer();
+      scrollController?.scrollToTarget(href);
     });
   });
 
-  navBookBtn?.addEventListener('click', () => onOpenBooking?.());
-  mobileBookBtn?.addEventListener('click', () => {
-    closeMobileDrawer();
-    onOpenBooking?.();
+  consultBtn?.addEventListener('click', () => onOpenConsultation?.());
+  mobileConsultBtn?.addEventListener('click', () => {
+    closeDrawer();
+    onOpenConsultation?.();
   });
 
   return {
-    setActiveZone(zoneNum) {
-      navLinks.forEach((link) => {
-        const isCurrent = Number(link.dataset.zoneLink) === zoneNum;
-        link.classList.toggle('is-active', isCurrent);
+    setActiveZone(zoneId) {
+      navItems.forEach((item) => {
+        item.classList.toggle('is-active', Number(item.dataset.zoneLink) === zoneId);
       });
     },
-    setScrollPercent(pct) {
-      if (pctEl) pctEl.textContent = `${String(pct).padStart(2, '0')}%`;
+    setScrollProgress(pct) {
+      if (progressBar) {
+        progressBar.style.width = `${pct.toFixed(1)}%`;
+      }
     },
   };
 }
 
-let toastTimer = null;
+let toastTimeout = null;
 export function showToast(message) {
-  const el = document.getElementById('studio-toast');
-  if (!el) return;
-  el.textContent = message;
-  el.hidden = false;
-  clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => {
-    el.hidden = true;
-  }, 3400);
+  const toast = document.getElementById('studio-toast');
+  if (!toast) return;
+  toast.textContent = message;
+  toast.hidden = false;
+  clearTimeout(toastTimeout);
+  toastTimeout = setTimeout(() => {
+    toast.hidden = true;
+  }, 3200);
 }
