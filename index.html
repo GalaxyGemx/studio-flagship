@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>NORTHSTAR INTERACTIVE — 3D Architectural WebGL &amp; Enterprise Automation Studio</title>
+    <meta
+      name="description"
+      content="Commercial real estate development and enterprise interactive web engineering studio specializing in real-time PBR 3D scrollytelling teardowns, investor portals, and preconstruction ROI automation."
+    />
+    <meta name="theme-color" content="#07080A" />
+    <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <script type="module" crossorigin src="./assets/index-x__7DjTk.js"></script>
+    <link rel="modulepreload" crossorigin href="./assets/three-nZcM9jM4.js">
+    <link rel="modulepreload" crossorigin href="./assets/motion-CgUJxjNR.js">
+    <link rel="stylesheet" crossorigin href="./assets/motion-fOJvfYOR.css">
+    <link rel="stylesheet" crossorigin href="./assets/index-CiHDfZq1.css">
+  </head>
+  <body>
+    <!-- Fixed Persistent Real-Time PBR WebGL Stage -->
+    <div id="webgl-stage" aria-hidden="true">
+      <canvas id="studio-canvas"></canvas>
+      <!-- Real-time 3D-to-2D Projected Hairline Leader Callouts -->
+      <svg id="callout-svg" xmlns="http://www.w3.org/2000/svg"></svg>
+      <!-- Clickable 3D Hotspot Pins Layer (Zone 2) -->
+      <div id="hotspot-layer"></div>
+    </div>
+
+    <!-- Fixed Architectural Top Navigation -->
+    <header id="studio-nav" class="studio-nav">
+      <div class="nav-inner">
+        <a href="#zone-hero" class="nav-brand" id="nav-brand-link" aria-label="Studio Home">
+          <svg class="brand-mark" width="26" height="26" viewBox="0 0 64 64" fill="none" aria-hidden="true">
+            <polygon points="32,8 52,32 32,56 12,32" stroke="#D6DCE5" stroke-width="2.4" fill="rgba(20,23,28,0.8)" />
+            <polygon points="32,19 42,32 32,45 22,32" stroke="#D49B4B" stroke-width="2" fill="rgba(212,155,75,0.16)" />
+            <circle cx="32" cy="32" r="3.4" fill="#38BDF8" />
+          </svg>
+          <span class="brand-wordmark" data-studio-brand>NORTHSTAR INTERACTIVE</span>
+        </a>
+
+        <nav class="nav-links" aria-label="Primary sections">
+          <a href="#zone-hero" class="nav-link is-active" data-zone-link="1"><span>01</span> Massing</a>
+          <a href="#zone-structural" class="nav-link" data-zone-link="2"><span>02</span> Layers</a>
+          <a href="#zone-hardware" class="nav-link" data-zone-link="3"><span>03</span> Portal OS</a>
+          <a href="#zone-estimator" class="nav-link" data-zone-link="4"><span>04</span> ROI Scope</a>
+          <a href="#zone-engage" class="nav-link" data-zone-link="5"><span>05</span> Engage</a>
+        </nav>
+
+        <div class="nav-actions">
+          <div class="nav-telemetry" aria-label="Scroll depth and active lighting preset">
+            <span id="nav-lighting-badge" class="telemetry-chip">NIGHT GLOW</span>
+            <span id="nav-scroll-pct" class="telemetry-pct">00%</span>
+          </div>
+          <button type="button" id="nav-book-btn" class="btn btn-primary btn-sm">
+            Book Discovery
+          </button>
+          <button
+            type="button"
+            id="mobile-menu-toggle"
+            class="mobile-menu-btn"
+            aria-label="Toggle navigation menu"
+            aria-expanded="false"
+          >
+            <span></span>
+            <span></span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Mobile Drawer -->
+      <div id="mobile-nav-drawer" class="mobile-drawer" hidden>
+        <a href="#zone-hero" class="mobile-nav-link" data-zone-link="1">01 // Architectural Massing</a>
+        <a href="#zone-structural" class="mobile-nav-link" data-zone-link="2">02 // Preconstruction Layers</a>
+        <a href="#zone-hardware" class="mobile-nav-link" data-zone-link="3">03 // Smart Building Portal</a>
+        <a href="#zone-estimator" class="mobile-nav-link" data-zone-link="4">04 // Project Scope &amp; ROI App</a>
+        <a href="#zone-engage" class="mobile-nav-link" data-zone-link="5">05 // Studio Engagement</a>
+        <button type="button" id="mobile-drawer-book" class="btn btn-primary btn-full">
+          Book Executive Discovery Call
+        </button>
+      </div>
+    </header>
+
+    <!-- Right-Edge Vertical Scroll Telemetry Rail (Desktop) -->
+    <aside class="telemetry-rail" aria-label="Section scroll index">
+      <button type="button" class="rail-tick is-active" data-zone-link="1" title="01 Architectural Massing">
+        <span class="rail-code">01</span>
+        <span class="rail-bar"></span>
+      </button>
+      <button type="button" class="rail-tick" data-zone-link="2" title="02 Preconstruction Teardown">
+        <span class="rail-code">02</span>
+        <span class="rail-bar"></span>
+      </button>
+      <button type="button" class="rail-tick" data-zone-link="3" title="03 Smart Building Hardware">
+        <span class="rail-code">03</span>
+        <span class="rail-bar"></span>
+      </button>
+      <button type="button" class="rail-tick" data-zone-link="4" title="04 Scope &amp; ROI Estimator">
+        <span class="rail-code">04</span>
+        <span class="rail-bar"></span>
+      </button>
+      <button type="button" class="rail-tick" data-zone-link="5" title="05 Magnetic Reassembly &amp; Engage">
+        <span class="rail-code">05</span>
+        <span class="rail-bar"></span>
+      </button>
+    </aside>
+
+    <!-- Main 5-Zone Scrollytelling Content -->
+    <main id="studio-main">
+      <!-- =================================================================
+           ZONE 1: HERO & ARCHITECTURAL MASSING (20-Piece PBR Complex)
+      ================================================================== -->
+      <section id="zone-hero" class="zone zone-hero" data-zone="1">
+        <!-- Non-blocking Interactive 360 Orbit Capture Stage -->
+        <div id="hero-orbit-surface" class="hero-orbit-surface" aria-label="Interactive 3D architectural massing viewport">
+          <div class="orbit-hud-cue">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
+              <path d="M21 12a9 9 0 0 1-9 9m9-9a9 9 0 0 0-9-9m9 9H3m9 9a9 9 0 0 1-9-9m9 9c1.66 0 3-4.03 3-9s-1.34-9-3-9m0 18c-1.66 0-3-4.03-3-9s1.34-9 3-9" />
+            </svg>
+            <span>Drag horizontally to orbit 360°</span>
+            <button type="button" id="orbit-reset-btn" class="orbit-reset-btn">Reset View</button>
+          </div>
+        </div>
+
+        <div class="zone-container hero-layout">
+          <div class="hero-content">
+            <div class="section-index">
+              <span class="index-num">01</span>
+              <span class="index-rule"></span>
+              <span class="index-label">COMMERCIAL DEVELOPMENT &amp; REAL-TIME WEBGL</span>
+            </div>
+
+            <h1 class="hero-title">
+              Interactive 3D Platforms Engineered to Close Institutional Deals.
+            </h1>
+
+            <p class="hero-subtitle">
+              We architect 60 FPS PBR architectural digital twins, interactive preconstruction
+              teardowns, and AI-automated investor portals for commercial developers, GCs, and
+              enterprise operators.
+            </p>
+
+            <!-- Clickable Lighting / Material Studio Switcher -->
+            <div class="lighting-switcher-panel surface-glass" aria-label="3D Studio lighting and material preset switcher">
+              <div class="panel-header-row">
+                <span class="mono-label">STUDIO LIGHTING &amp; MATERIAL RIG</span>
+                <span id="lighting-mode-code" class="mono-accent">MODE 01</span>
+              </div>
+              <div id="lighting-toggle-group" class="segmented-control" role="radiogroup" aria-label="Lighting preset">
+                <!-- Populated by zone1Controls.js -->
+              </div>
+              <p id="lighting-mode-desc" class="panel-micro-desc"></p>
+            </div>
+
+            <div class="hero-cta-row">
+              <a href="#zone-estimator" class="btn btn-primary" id="hero-estimator-cta">
+                Launch Scope &amp; ROI Estimator
+              </a>
+              <a href="#zone-structural" class="btn btn-ghost" id="hero-teardown-cta">
+                Inspect Exploded Teardowns
+              </a>
+            </div>
+          </div>
+
+          <!-- Bottom Architectural Benchmark Spec Strip -->
+          <div class="hero-spec-strip">
+            <div class="spec-cell">
+              <span class="spec-label">REFERENCE BENCHMARK</span>
+              <span class="spec-value" data-ref-project>THE FOUNDRY AT ROSWELL CROSSING</span>
+            </div>
+            <div class="spec-cell">
+              <span class="spec-label">GROSS BUILDING AREA</span>
+              <span class="spec-value">418,500 GSF · 22 STORIES</span>
+            </div>
+            <div class="spec-cell">
+              <span class="spec-label">REAL-TIME ENGINE</span>
+              <span class="spec-value">50+ BEVELED PBR PARTS · 60 FPS</span>
+            </div>
+            <div class="spec-cell spec-scroll-prompt">
+              <span class="spec-label">SCROLL TO SCRUB TEARDOWNS</span>
+              <span class="spec-value mono-accent">↓ WEIGHTED INERTIA ACTIVE</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- =================================================================
+           ZONE 2: MINI-TEARDOWN #1 — PRECONSTRUCTION & STRUCTURAL LAYERS
+      ================================================================== -->
+      <section id="zone-structural" class="zone zone-scroll-track" data-zone="2">
+        <div class="zone-sticky-stage">
+          <div class="zone-container split-stage-layout">
+            <!-- Left Side stays transparent for 3D Vertical Exploded Building + Hairline Callouts + Clickable Hotspot Pins -->
+            <div class="stage-viewport-slot">
+              <div class="stage-corner-header">
+                <div class="section-index">
+                  <span class="index-num">02</span>
+                  <span class="index-rule"></span>
+                  <span class="index-label">PRECONSTRUCTION &amp; STRUCTURAL LAYERS</span>
+                </div>
+                <h2 class="stage-title">15-Layer Vertical Building Teardown.</h2>
+                <p class="stage-caption">
+                  Scroll to scrub structural separation. Click any 3D hotspot pin or layer index to
+                  inspect real preconstruction GMP metrics.
+                </p>
+              </div>
+
+              <div class="scrub-progress-pill">
+                <span class="mono-label">EXPLOSION SCRUB</span>
+                <div class="scrub-track"><div id="z2-scrub-fill" class="scrub-fill"></div></div>
+                <span id="z2-scrub-readout" class="mono-accent">00%</span>
+              </div>
+            </div>
+
+            <!-- Right Rail: Docked Live Architectural Spec Card -->
+            <aside class="stage-dock-rail">
+              <div id="zone2-spec-card" class="spec-drawer surface-glass" aria-live="polite">
+                <!-- Populated & dynamically updated by zone2Hotspots.js -->
+              </div>
+            </aside>
+          </div>
+        </div>
+      </section>
+
+      <!-- =================================================================
+           ZONE 3: MINI-TEARDOWN #2 — SMART BUILDING & INVESTOR PORTAL HARDWARE
+      ================================================================== -->
+      <section id="zone-hardware" class="zone zone-scroll-track" data-zone="3">
+        <div class="zone-sticky-stage">
+          <div class="zone-container split-stage-layout">
+            <!-- Left Side stays transparent for 15-Piece Z-Axis Exploded Hardware & Live 3D OLED Display -->
+            <div class="stage-viewport-slot">
+              <div class="stage-corner-header">
+                <div class="section-index">
+                  <span class="index-num">03</span>
+                  <span class="index-rule"></span>
+                  <span class="index-label">SMART BUILDING &amp; INVESTOR PORTAL HARDWARE</span>
+                </div>
+                <h2 class="stage-title">Z-Axis Hardware &amp; Live Portal OS.</h2>
+                <p class="stage-caption">
+                  15 precision-machined hardware modules synced live to your executive portal.
+                  Switch portal views to update the 3D hardware display in real time.
+                </p>
+              </div>
+
+              <div class="scrub-progress-pill">
+                <span class="mono-label">Z-AXIS SEPARATION</span>
+                <div class="scrub-track"><div id="z3-scrub-fill" class="scrub-fill"></div></div>
+                <span id="z3-scrub-readout" class="mono-accent">00%</span>
+              </div>
+            </div>
+
+            <!-- Right Rail: Interactive Investor / Tenant / Site Portal Switcher -->
+            <aside class="stage-dock-rail stage-dock-wide">
+              <div id="zone3-portal-card" class="portal-drawer surface-glass">
+                <!-- Populated & driven by zone3Portal.js -->
+              </div>
+            </aside>
+          </div>
+        </div>
+      </section>
+
+      <!-- =================================================================
+           ZONE 4: UNIVERSAL B2B APP — INSTANT PROJECT SCOPE & ROI ESTIMATOR
+      ================================================================== -->
+      <section id="zone-estimator" class="zone zone-estimator" data-zone="4">
+        <div class="zone-container estimator-container">
+          <header class="estimator-header">
+            <div class="section-index">
+              <span class="index-num">04</span>
+              <span class="index-rule"></span>
+              <span class="index-label">EMBEDDED UNIVERSAL B2B WEB APPLICATION</span>
+            </div>
+            <h2 class="section-heading">Instant Project Scope &amp; Preconstruction ROI Estimator.</h2>
+            <p class="section-lead">
+              A live executive scoping utility built to embed directly onto developer, contractor,
+              and enterprise websites—qualifying high-value deals and outputting board-ready briefs
+              in seconds.
+            </p>
+          </header>
+
+          <div id="estimator-app-root" class="estimator-grid">
+            <!-- Populated & live-calculated by zone4Estimator.js -->
+          </div>
+        </div>
+      </section>
+
+      <!-- =================================================================
+           ZONE 5: MAGNETIC REASSEMBLY & STUDIO ENGAGEMENT CONFIGURATOR
+      ================================================================== -->
+      <section id="zone-engage" class="zone zone-engage" data-zone="5">
+        <div class="zone-sticky-stage engage-sticky-stage">
+          <div class="zone-container split-stage-layout engage-layout">
+            <!-- Left Side stays open for 3D Magnetic Reassembly into Unified Studio Emblem -->
+            <div class="stage-viewport-slot engage-emblem-slot">
+              <div class="stage-corner-header">
+                <div class="section-index">
+                  <span class="index-num">05</span>
+                  <span class="index-rule"></span>
+                  <span class="index-label">MAGNETIC REASSEMBLY &amp; ENGAGEMENT</span>
+                </div>
+                <h2 class="stage-title">Engineered for Executive Velocity.</h2>
+                <p class="stage-caption">
+                  From 48-hour investor pitch prototypes to full commercial flagship platforms,
+                  every system ships production-hardened with 100% source ownership.
+                </p>
+              </div>
+
+              <div class="emblem-status-readout">
+                <span class="mono-label">MAGNETIC LOCK</span>
+                <div class="scrub-track"><div id="z5-scrub-fill" class="scrub-fill"></div></div>
+                <span id="z5-scrub-readout" class="mono-accent">00%</span>
+              </div>
+            </div>
+
+            <!-- Right Rail: Interactive Studio Engagement Configurator -->
+            <div class="stage-dock-rail stage-dock-engage">
+              <div id="zone5-configurator-root" class="configurator-card surface-glass">
+                <!-- Populated & driven by zone5Configurator.js -->
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Architectural Studio Footer -->
+    <footer class="studio-footer">
+      <div class="zone-container footer-inner">
+        <div class="footer-brand-block">
+          <span class="brand-wordmark" data-studio-brand>NORTHSTAR INTERACTIVE</span>
+          <p class="footer-meta" data-studio-regions>Atlanta · Spartanburg · New York</p>
+        </div>
+        <div class="footer-links">
+          <a href="#zone-hero" data-zone-link="1">Massing</a>
+          <a href="#zone-structural" data-zone-link="2">Layers</a>
+          <a href="#zone-hardware" data-zone-link="3">Portal OS</a>
+          <a href="#zone-estimator" data-zone-link="4">ROI Estimator</a>
+          <a href="#zone-engage" data-zone-link="5">Engagement</a>
+        </div>
+        <div class="footer-status">
+          <span class="mono-label">THREE.JS PBR · GSAP SCROLLTRIGGER · LENIS</span>
+        </div>
+      </div>
+    </footer>
+
+    <!-- 1-Click Executive Booking Modal -->
+    <div id="booking-modal" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="booking-modal-title" hidden>
+      <div class="modal-dialog surface-glass">
+        <div class="modal-header">
+          <div>
+            <span class="mono-accent">EXECUTIVE DISCOVERY BRIEFING</span>
+            <h3 id="booking-modal-title" class="modal-title">Reserve Your Studio Architecture Session</h3>
+          </div>
+          <button type="button" id="booking-modal-close" class="modal-close-btn" aria-label="Close booking dialog">
+            ✕
+          </button>
+        </div>
+        <div id="booking-modal-body" class="modal-body">
+          <!-- Rendered & managed by zone5Configurator.js -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Global Toast Notification -->
+    <div id="studio-toast" class="studio-toast" role="status" aria-live="polite" hidden></div>
+
+  </body>
+</html>
