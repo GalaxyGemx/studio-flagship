@@ -1,0 +1,475 @@
+/**
+ * Single-source Studio Identity & Commercial Development Dataset
+ * Swap `brandName`, `brandShort`, and `contactEmail` here to rebrand globally.
+ */
+export const STUDIO_CONFIG = {
+  brandName: 'NORTHSTAR INTERACTIVE',
+  brandShort: 'NORTHSTAR',
+  brandDescriptor: 'Interactive Web Engineering & AI Automation Studio',
+  tagline: 'Real-time 3D architectural platforms & preconstruction intelligence for commercial developers.',
+  regions: 'Atlanta · Spartanburg · New York',
+  contactEmail: 'partners@northstarinteractive.studio',
+  bookingDomain: 'cal.northstarinteractive.studio',
+  referenceAsset: {
+    projectName: 'THE FOUNDRY AT ROSWELL CROSSING',
+    assetClass: 'Class-A Mixed-Use & Hospitality Tower',
+    grossSqFt: '418,500 GSF',
+    stories: '22 Stories · 3-Level Podium',
+    targetDelivery: 'Q4 2027',
+  },
+};
+
+export const LIGHTING_MODES = [
+  {
+    id: 'night',
+    label: 'Night Retail Glow',
+    shortLabel: 'Night Glow',
+    code: 'MODE 01',
+    description: 'Obsidian studio backdrop with warm retail bay luminance, cyan rim sculpting, and floor-plate telemetry bloom.',
+  },
+  {
+    id: 'daylight',
+    label: 'Daylight Render',
+    shortLabel: 'Daylight',
+    code: 'MODE 02',
+    description: 'High-key architectural studio light evaluating massing proportions, curtain-wall reflection, and façade geometry.',
+  },
+  {
+    id: 'wireframe',
+    label: 'Structural Wireframe',
+    shortLabel: 'Wireframe',
+    code: 'MODE 03',
+    description: 'X-ray BIM diagnostic overlay exposing structural steel frames, shear cores, and vertical MEP risers.',
+  },
+];
+
+/**
+ * Zone 2 — Preconstruction & Structural Layer Hotspot Spec Cards
+ * Mapped directly to 3D layer group keys in zone2Structural.js
+ */
+export const STRUCTURAL_HOTSPOTS = [
+  {
+    id: 'crown',
+    code: '01',
+    calloutLabel: '01 // ROOFTOP CROWN & SOLAR',
+    layerKey: 'crown',
+    title: 'Architectural Crown & Penthouse',
+    csiDivision: 'DIV 07 · Thermal & Moisture / Photovoltaic',
+    sqft: '18,400 GSF Mechanical + Solar Canopy',
+    leaseStatus: 'Owner-Operated Amenity & ESG Offset',
+    buildCost: '$410 / SF',
+    costContext: 'Includes acoustic chiller screen & 180 kW array',
+    highlights: [
+      'Chamfered anodized aluminum crown with integrated perimeter LED cove',
+      '180 kW architectural bifacial canopy offsetting 24% common-area load',
+      'Vibration-isolated mechanical penthouse pre-modeled for crane pick sequence',
+    ],
+  },
+  {
+    id: 'curtainWall',
+    code: '02',
+    calloutLabel: '02 // CURTAIN WALL MULLIONS',
+    layerKey: 'curtainWall',
+    title: 'Unitized Curtain Wall & Mullions',
+    csiDivision: 'DIV 08 · Openings & Glazing Systems',
+    sqft: '146,200 SF Façade Surface Area',
+    leaseStatus: '100% Shop Drawings Approved · Mill Slot Locked',
+    buildCost: '$142 / SF Façade',
+    costContext: 'Triple-silver Low-E IGUs · 0.24 SHGC',
+    highlights: [
+      'Pre-glazed unitized panels cut dry-in critical path by 7.5 weeks',
+      'Brushed titanium vertical fins reduce West-elevation solar gain by 31%',
+      'BIM clash detection resolved 114 slab-edge anchor conflicts pre-pour',
+    ],
+  },
+  {
+    id: 'floorPlates',
+    code: '03',
+    calloutLabel: '03 // FLOOR PLATE STACK',
+    layerKey: 'floorPlates',
+    title: 'Class-A Office & Executive Plates',
+    csiDivision: 'DIV 03 · Post-Tensioned Concrete Slabs',
+    sqft: '248,000 RSF (19,200 SF Typical Plate)',
+    leaseStatus: '84% Pre-Leased · 2 Anchor Tenants Executed',
+    buildCost: '$385 / SF',
+    costContext: 'Core & Shell GMP · 14\'6" slab-to-slab clear',
+    highlights: [
+      'Column-free 42-ft lease spans maximize tenant planning efficiency',
+      'Cantilevered Level 12 Amenity Sky-Deck with indoor-outdoor boardrooms',
+      'Interactive 3D stack plan shortened anchor LOI cycle from 11 to 4 weeks',
+    ],
+  },
+  {
+    id: 'mepCore',
+    code: '04',
+    calloutLabel: '04 // MEP / HVAC CORE',
+    layerKey: 'mepCore',
+    title: 'Central MEP / HVAC & Smart Riser Core',
+    csiDivision: 'DIV 23 / 26 · Mechanical, Electrical & Controls',
+    sqft: '34,600 GSF Core Footprint · 1,450 Tons Cooling',
+    leaseStatus: 'Zero Unresolved BIM Clashes · Prefab Ready',
+    buildCost: '$118 / SF MEP',
+    costContext: 'DOAS + chilled beams + BACnet IP telemetry',
+    highlights: [
+      'Modular prefabricated riser racks eliminate 2,400 onsite field labor hours',
+      'Dedicated outdoor air system (DOAS) with MERV-15 + real-time IAQ telemetry',
+      'Digital twin endpoints tied directly into tenant & facility BMS dashboards',
+    ],
+  },
+  {
+    id: 'steelFrame',
+    code: '05',
+    calloutLabel: '05 // STRUCTURAL STEEL FRAME',
+    layerKey: 'steelFrame',
+    title: 'Perimeter Diagrid & Transfer Truss',
+    csiDivision: 'DIV 05 · Structural Steel Framing',
+    sqft: '4,280 Tons Grade-50 Structural Steel',
+    leaseStatus: '88% Fabricated · Erection Sequence Active',
+    buildCost: '$64 / SF Frame',
+    costContext: 'Mill-direct procurement locked Q1 pricing',
+    highlights: [
+      'Long-span Level 4 transfer truss opens ground retail without drop columns',
+      'Moment-resisting perimeter frames engineered for Seismic Design Cat C',
+      'Live mill-to-crane QR tracking synced to executive investor portal',
+    ],
+  },
+  {
+    id: 'foundation',
+    code: '06',
+    calloutLabel: '06 // FOUNDATION & CAISSONS',
+    layerKey: 'foundation',
+    title: 'Structured Parking Vault & Caissons',
+    csiDivision: 'DIV 31 · Earthwork & Deep Foundations',
+    sqft: '112,500 GSF · 320 Structured EV-Ready Stalls',
+    leaseStatus: '100% Complete · Signed Off by Geotech',
+    buildCost: '$94 / SF Subgrade',
+    costContext: '68 drilled shafts socketed 45 ft to granite',
+    highlights: [
+      '8-foot reinforced mat foundation under central elevator shear core',
+      '3-level below-grade deck with license-plate recognition & EV load balancing',
+      'Dewatering and shoring telemetry monitored continuously through closeout',
+    ],
+  },
+];
+
+/**
+ * Zone 3 — Smart Building Hardware Callouts & Live Interactive Portal Datasets
+ */
+export const HARDWARE_CALLOUTS = [
+  { id: 'optics', layerKey: 'sapphireBezel', label: '01 // SAPPHIRE OPTICS' },
+  { id: 'display', layerKey: 'oledMatrix', label: '02 // MICRO-OLED PORTAL' },
+  { id: 'compute', layerKey: 'aiCompute', label: '03 // EDGE-AI COMPUTE' },
+  { id: 'chassis', layerKey: 'titaniumFrame', label: '04 // TITANIUM CHASSIS' },
+  { id: 'bms', layerKey: 'bmsPcb', label: '05 // BMS TELEMETRY PCB' },
+  { id: 'uwb', layerKey: 'uwbCoil', label: '06 // UWB ACCESS COIL' },
+];
+
+export const PORTAL_DATA = {
+  investor: {
+    id: 'investor',
+    tabLabel: 'Investor ROI View',
+    shortLabel: 'Investor ROI',
+    screenTitle: 'CAPITAL STACK & IRR TELEMETRY',
+    accent: '#D49B4B',
+    scenarios: {
+      conservative: {
+        label: 'Conservative',
+        irr: '17.8%',
+        equityMultiple: '1.92x',
+        yieldOnCost: '7.45%',
+        stabilizedNoi: '$13.4M',
+        preLeased: '78%',
+        capitalStack: [
+          { label: 'Senior Construction Loan', pct: 62, amount: '$104.2M', tone: 'steel' },
+          { label: 'LP Institutional Equity', pct: 28, amount: '$47.0M', tone: 'amber' },
+          { label: 'GP Sponsor Co-Invest', pct: 10, amount: '$16.8M', tone: 'cyan' },
+        ],
+        note: 'Stress-tested at +50 bps exit cap rate (6.25%) and 4-month lease-up buffer.',
+      },
+      base: {
+        label: 'Base Case',
+        irr: '21.4%',
+        equityMultiple: '2.18x',
+        yieldOnCost: '8.12%',
+        stabilizedNoi: '$14.9M',
+        preLeased: '84%',
+        capitalStack: [
+          { label: 'Senior Construction Loan', pct: 62, amount: '$104.2M', tone: 'steel' },
+          { label: 'LP Institutional Equity', pct: 28, amount: '$47.0M', tone: 'amber' },
+          { label: 'GP Sponsor Co-Invest', pct: 10, amount: '$16.8M', tone: 'cyan' },
+        ],
+        note: '5.75% exit cap · GMP locked at $168M total capitalization · Q4 2027 stabilization.',
+      },
+      upside: {
+        label: 'Accelerated Lease-Up',
+        irr: '24.6%',
+        equityMultiple: '2.41x',
+        yieldOnCost: '8.58%',
+        stabilizedNoi: '$15.8M',
+        preLeased: '94%',
+        capitalStack: [
+          { label: 'Senior Construction Loan', pct: 62, amount: '$104.2M', tone: 'steel' },
+          { label: 'LP Institutional Equity', pct: 28, amount: '$47.0M', tone: 'amber' },
+          { label: 'GP Sponsor Co-Invest', pct: 10, amount: '$16.8M', tone: 'cyan' },
+        ],
+        note: 'Driven by 3D pre-leasing velocity closing remaining penthouse plates 5 months early.',
+      },
+    },
+  },
+  tenant: {
+    id: 'tenant',
+    tabLabel: 'Tenant Leasing View',
+    shortLabel: 'Tenant Leasing',
+    screenTitle: 'LIVE STACK PLAN & SUITE EXPLORER',
+    accent: '#38BDF8',
+    suites: [
+      {
+        id: 'L21',
+        floor: 'Level 21–22',
+        suite: 'Penthouse 2100',
+        rsf: '18,600 RSF',
+        rate: '$52.00 / SF NNN',
+        status: 'Available',
+        statusTone: 'cyan',
+        tiAllowance: '$95 / SF TI',
+        exposure: '360° Skyline · Private Terrace',
+        delivery: 'Q3 2027 Warm Shell',
+      },
+      {
+        id: 'L16',
+        floor: 'Level 16',
+        suite: 'Suite 1600',
+        rsf: '19,200 RSF',
+        rate: '$47.50 / SF NNN',
+        status: 'Touring (2 LOIs)',
+        statusTone: 'amber',
+        tiAllowance: '$85 / SF TI',
+        exposure: 'North / East Panoramic Glass',
+        delivery: 'Q2 2027 Spec Ready',
+      },
+      {
+        id: 'L12',
+        floor: 'Level 12',
+        suite: 'Amenity Sky-Deck',
+        rsf: '14,800 GSF',
+        rate: 'Building Common',
+        status: 'Tenant Exclusive',
+        statusTone: 'neutral',
+        tiAllowance: 'Turnkey Furnished',
+        exposure: 'Cantilevered Deck · 120-Seat Town Hall',
+        delivery: 'Q2 2027 Opening',
+      },
+      {
+        id: 'L08',
+        floor: 'Level 08–10',
+        suite: 'Anchor Block 800',
+        rsf: '57,600 RSF',
+        rate: 'Executed · 12-Yr Term',
+        status: 'Pre-Leased',
+        statusTone: 'green',
+        tiAllowance: '$90 / SF TI',
+        exposure: 'Dedicated Interconnecting Stair',
+        delivery: 'Tenant Buildout Q1 2027',
+      },
+      {
+        id: 'L01',
+        floor: 'Level 01–02',
+        suite: 'Retail Podium R104',
+        rsf: '6,450 RSF',
+        rate: '$64.00 / SF NNN',
+        status: 'Available · Flagship',
+        statusTone: 'cyan',
+        tiAllowance: '$75 / SF TI + Grease Trap',
+        exposure: '22-Ft Glass Frontage · Plaza Patio',
+        delivery: 'Q1 2027 Shell Delivery',
+      },
+    ],
+  },
+  site: {
+    id: 'site',
+    tabLabel: 'Site Progress Tracker',
+    shortLabel: 'Site Progress',
+    screenTitle: 'CRITICAL PATH & FIELD TELEMETRY',
+    accent: '#5EEAD4',
+    summary: {
+      overallPct: 71,
+      daysAhead: '+11 Days Ahead of Baseline',
+      openRfis: 7,
+      safetyDays: '418 Zero-Incident Days',
+      gmpVariance: '-0.8% Under GMP Budget',
+    },
+    milestones: [
+      { id: 'fdn', phase: '01 · Deep Foundations & Caissons', pct: 100, status: 'Signed Off', date: 'Completed' },
+      { id: 'steel', phase: '02 · Structural Steel & Diagrid', pct: 88, status: 'Level 19 Topping Out', date: 'On Schedule' },
+      { id: 'glass', phase: '03 · Unitized Curtain Wall', pct: 62, status: 'Floor 13 Dry-In Active', date: '+6 Days' },
+      { id: 'mep', phase: '04 · Central MEP / HVAC Risers', pct: 47, status: 'Prefab Modules Hoisting', date: 'On Schedule' },
+      { id: 'closeout', phase: '05 · Commissioning & Closeout', pct: 14, status: 'Digital Twin QA Live', date: 'Target Q4 2027' },
+    ],
+  },
+};
+
+/**
+ * Zone 4 — Universal B2B Project Scope & Preconstruction ROI Estimator Models
+ */
+export const ESTIMATOR_PROJECT_TYPES = [
+  {
+    id: 'mixed-use',
+    label: 'Mixed-Use Development',
+    short: 'Mixed-Use',
+    baseCost: 44000,
+    sqftFactor: 0.048,
+    baseWeeks: 6.5,
+    carryMonthlyPer100k: 285000,
+    leaseAccelerationMonths: 2.6,
+    hoursSavedBase: 420,
+    deliverableFocus: '3D massing explorer, vertical structural teardown, retail/office stack plan & LP investor data room.',
+  },
+  {
+    id: 'hospitality',
+    label: 'Hospitality / Hotel',
+    short: 'Hospitality',
+    baseCost: 39000,
+    sqftFactor: 0.044,
+    baseWeeks: 6.0,
+    carryMonthlyPer100k: 240000,
+    leaseAccelerationMonths: 2.2,
+    hoursSavedBase: 360,
+    deliverableFocus: 'Day-to-night architectural ambiance engine, amenity floor previews, capital partner pitch deck & ADR calculator.',
+  },
+  {
+    id: 'commercial',
+    label: 'Commercial Build / GC',
+    short: 'Commercial Build',
+    baseCost: 34000,
+    sqftFactor: 0.036,
+    baseWeeks: 5.5,
+    carryMonthlyPer100k: 195000,
+    leaseAccelerationMonths: 1.9,
+    hoursSavedBase: 510,
+    deliverableFocus: 'Preconstruction BIM phasing showcase, live GMP scope estimator, subcontractor/RFP qualification portal.',
+  },
+  {
+    id: 'enterprise',
+    label: 'Custom Enterprise Platform',
+    short: 'Custom Enterprise',
+    baseCost: 48000,
+    sqftFactor: 0.052,
+    baseWeeks: 7.5,
+    carryMonthlyPer100k: 310000,
+    leaseAccelerationMonths: 2.8,
+    hoursSavedBase: 640,
+    deliverableFocus: 'Bespoke WebGL product/facility twin, interactive executive ROI engine & automated CRM/AI intake pipeline.',
+  },
+];
+
+export const ESTIMATOR_TIMELINES = [
+  { id: 'accelerated', label: 'Accelerated (4–6 Wks)', multiplier: 1.24, weekFactor: 0.78, badge: 'Dedicated Sprint Squad' },
+  { id: 'standard', label: 'Standard (8–12 Wks)', multiplier: 1.0, weekFactor: 1.0, badge: 'Optimal Engineering Pace' },
+  { id: 'portfolio', label: 'Multi-Phase (16+ Wks)', multiplier: 1.38, weekFactor: 1.55, badge: 'Multi-Asset Portfolio Rollout' },
+];
+
+export const ESTIMATOR_MODULES = [
+  {
+    id: 'twin3d',
+    label: '3D Scroll-Scrubbed Architectural Twin',
+    costAdd: 12000,
+    weeksAdd: 1.2,
+    hoursAdd: 110,
+    valueBoost: 1.18,
+    defaultOn: true,
+  },
+  {
+    id: 'leasing',
+    label: 'Interactive Floor-Plate & Leasing Explorer',
+    costAdd: 8500,
+    weeksAdd: 0.8,
+    hoursAdd: 145,
+    valueBoost: 1.15,
+    defaultOn: true,
+  },
+  {
+    id: 'investor',
+    label: 'Investor Data Room & Live IRR Telemetry',
+    costAdd: 9500,
+    weeksAdd: 0.9,
+    hoursAdd: 160,
+    valueBoost: 1.16,
+    defaultOn: false,
+  },
+  {
+    id: 'aiIntake',
+    label: 'AI Preconstruction & RFI Intake Automation',
+    costAdd: 11000,
+    weeksAdd: 1.1,
+    hoursAdd: 240,
+    valueBoost: 1.12,
+    defaultOn: false,
+  },
+];
+
+/**
+ * Zone 5 — Engagement Package Configurator Tiers & Accelerators
+ */
+export const ENGAGEMENT_TIERS = [
+  {
+    id: 'prototype',
+    code: 'TIER 01',
+    name: '48-Hour Prototype',
+    subtitle: 'Executive Pitch & Deal Validation Sprint',
+    priceLow: 6500,
+    priceHigh: 6500,
+    priceDisplay: '$6,500 Fixed',
+    turnaroundDays: 2,
+    turnaroundLabel: '48 Hours',
+    idealFor: 'Active IC approvals, LP fundraising decks, or RFP shortlist presentations.',
+    deliverables: [
+      'Custom 3D interactive architectural hero scene with your real site massing',
+      'Live lighting/material switcher + 1 clickable spec teardown module',
+      'Deployed private preview URL ready for boardroom & mobile presentation',
+      '100% fee credited toward a full Flagship build within 30 days',
+    ],
+  },
+  {
+    id: 'flagship',
+    code: 'TIER 02 · RECOMMENDED',
+    name: '3D Scrollytelling Flagship',
+    subtitle: 'Full Commercial Development Platform',
+    priceLow: 38000,
+    priceHigh: 65000,
+    priceDisplay: '$38K – $65K',
+    turnaroundDays: 42,
+    turnaroundLabel: '5–7 Weeks',
+    recommended: true,
+    idealFor: 'Developers, GCs, and institutional operators launching marquee mixed-use assets or company rebrands.',
+    deliverables: [
+      'Multi-zone 60 FPS PBR 3D scrollytelling engine (desktop + mobile tuned)',
+      'Exploded preconstruction layers, 3D hotspot pins & live portal views',
+      'Embedded B2B Project Scope / ROI Estimator tuned to your exact margins',
+      'Full source ownership, analytics instrumentation & executive CMS handoff',
+    ],
+  },
+  {
+    id: 'workflow',
+    code: 'TIER 03',
+    name: 'Custom AI Workflow App',
+    subtitle: 'Preconstruction, Closeout & Automation Stack',
+    priceLow: 28000,
+    priceHigh: 55000,
+    priceDisplay: '$28K – $55K',
+    turnaroundDays: 38,
+    turnaroundLabel: '4–8 Weeks',
+    idealFor: 'Operations teams eliminating manual bid-leveling, RFI triage, and investor reporting bottlenecks.',
+    deliverables: [
+      'Bespoke full-stack web app with real-time executive telemetry UI',
+      'Automated proposal, scope-brief & sub-qualification AI pipelines',
+      'API bridges to Procore, HubSpot, Salesforce, or internal BIM models',
+      'Role-based access controls, audit logging & team onboarding workshop',
+    ],
+  },
+];
+
+export const ENGAGEMENT_ADDONS = [
+  { id: 'pitchSync', label: 'Boardroom Pitch Deck Sync', costAdd: 4500, daysAdd: 4 },
+  { id: 'fieldMode', label: 'Offline Mobile Field Tablet Mode', costAdd: 5500, daysAdd: 5 },
+  { id: 'sla', label: '90-Day Priority Studio SLA', costAdd: 6000, daysAdd: 0 },
+];

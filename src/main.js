@@ -1,60 +1,68 @@
-import './style.css'
-import heroImg from './assets/hero.png'
-import javascriptLogo from './assets/javascript.svg'
-import viteLogo from './assets/vite.svg'
-import { setupCounter } from './counter.js'
+import './styles/main.css';
+import { StudioEngine } from './three/StudioEngine.js';
+import { initScrollChoreography } from './ui/scrollChoreography.js';
+import { initZone1Controls } from './ui/zone1Controls.js';
+import { initZone2HotspotsAndCallouts } from './ui/zone2Hotspots.js';
+import { initZone3Portal } from './ui/zone3Portal.js';
+import { initZone4Estimator } from './ui/zone4Estimator.js';
+import { initZone5Configurator } from './ui/zone5Configurator.js';
+import { initNavigation, showToast } from './ui/navigation.js';
 
-document.querySelector('#app').innerHTML = `
-<section id="center">
-  <div class="hero">
-    <img src="${heroImg}" class="base" width="170" height="179">
-    <img src="${javascriptLogo}" class="framework" alt="JavaScript logo"/>
-    <img src="${viteLogo}" class="vite" alt="Vite logo" />
-  </div>
-  <div>
-    <h1>Get started</h1>
-    <p>Edit <code>src/main.js</code> and save to test <code>HMR</code></p>
-  </div>
-  <button id="counter" type="button" class="counter"></button>
-</section>
+function bootstrapStudioFlagship() {
+  const canvas = document.getElementById('studio-canvas');
+  if (!canvas) {
+    throw new Error('Studio WebGL canvas element (#studio-canvas) not found.');
+  }
 
-<div class="ticks"></div>
+  // 1. Initialize unified 60 FPS PBR 3D WebGL Engine
+  const engine = new StudioEngine(canvas);
 
-<section id="next-steps">
-  <div id="docs">
-    <svg class="icon" role="presentation" aria-hidden="true"><use href="/icons.svg#documentation-icon"></use></svg>
-    <h2>Documentation</h2>
-    <p>Your questions, answered</p>
-    <ul>
-      <li>
-        <a href="https://vite.dev/" target="_blank">
-          <img class="logo" src="${viteLogo}" alt="" />
-          Explore Vite
-        </a>
-      </li>
-      <li>
-        <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript" target="_blank">
-          <img class="button-icon" src="${javascriptLogo}" alt="">
-          Learn more
-        </a>
-      </li>
-    </ul>
-  </div>
-  <div id="social">
-    <svg class="icon" role="presentation" aria-hidden="true"><use href="/icons.svg#social-icon"></use></svg>
-    <h2>Connect with us</h2>
-    <p>Join the Vite community</p>
-    <ul>
-      <li><a href="https://github.com/vitejs/vite" target="_blank"><svg class="button-icon" role="presentation" aria-hidden="true"><use href="/icons.svg#github-icon"></use></svg>GitHub</a></li>
-      <li><a href="https://chat.vite.dev/" target="_blank"><svg class="button-icon" role="presentation" aria-hidden="true"><use href="/icons.svg#discord-icon"></use></svg>Discord</a></li>
-      <li><a href="https://x.com/vite_js" target="_blank"><svg class="button-icon" role="presentation" aria-hidden="true"><use href="/icons.svg#x-icon"></use></svg>X.com</a></li>
-      <li><a href="https://bsky.app/profile/vite.dev" target="_blank"><svg class="button-icon" role="presentation" aria-hidden="true"><use href="/icons.svg#bluesky-icon"></use></svg>Bluesky</a></li>
-    </ul>
-  </div>
-</section>
+  // 2. Initialize Zone 5 Configurator & 1-Click Booking Modal first so other zones can trigger it
+  const zone5 = initZone5Configurator({
+    onShowToast: showToast,
+  });
 
-<div class="ticks"></div>
-<section id="spacer"></section>
-`
+  // 3. Initialize Lenis + GSAP ScrollTrigger (scrub: 1.2) Choreography
+  let navApi = null;
+  const scrollController = initScrollChoreography(engine, {
+    onZoneChange: (zoneId) => navApi?.setActiveZone(zoneId),
+    onScrollPercent: (pct) => navApi?.setScrollPercent(pct),
+  });
 
-setupCounter(document.querySelector('#counter'))
+  // 4. Initialize Navigation & Brand Hydration
+  navApi = initNavigation({
+    scrollController,
+    onOpenBooking: (opts) => zone5.openBookingModal(opts),
+  });
+
+  // 5. Mount Zone 1 Lighting/Material Rig Switcher & 360° Orbit Controls
+  initZone1Controls(engine);
+
+  // 6. Mount Zone 2 Clickable 3D Hotspot Pins, SVG Hairline Leader Callouts & Live Spec Card
+  initZone2HotspotsAndCallouts(engine);
+
+  // 7. Mount Zone 3 Interactive Portal Switcher (Live-synced to 3D Kiosk OLED Display)
+  initZone3Portal(engine, {
+    onShowToast: showToast,
+    onOpenBooking: (opts) => zone5.openBookingModal(opts),
+  });
+
+  // 8. Mount Zone 4 Universal B2B Project Scope & Preconstruction ROI Estimator
+  initZone4Estimator({
+    onShowToast: showToast,
+    onSendBriefToEngage: (briefPayload) => {
+      zone5.applyEstimatorBrief(briefPayload);
+      showToast('Scope brief synced to Engagement Configurator.');
+      scrollController.scrollToTarget('#zone-engage');
+    },
+  });
+
+  // Expose debug handle cleanly on window for automated verification & telemetry inspection
+  window.__STUDIO_ENGINE__ = engine;
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', bootstrapStudioFlagship);
+} else {
+  bootstrapStudioFlagship();
+}
